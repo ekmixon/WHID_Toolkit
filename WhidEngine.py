@@ -8,7 +8,7 @@ class WhidEngine(object):
     # NOTE: check if the panel is reachable
     def __init__(self, panel):
         try:
-            if not "ESPloit" in requests.get(panel, timeout=1).text:
+            if "ESPloit" not in requests.get(panel, timeout=1).text:
                 print("\033[91mError 404, are you connected on the right AP?")
                 self.update_firmware()
 
@@ -20,28 +20,28 @@ class WhidEngine(object):
     # NOTE: this update use the last firmware on Github
     # You may need to build a new one with your keyboard mapping
     def update_firmware(self):
-         update = "https://github.com/exploitagency/ESPloitV2/releases"
-         update = requests.get(update).text
-         regex = re.compile("exploit.*\.bin")
-         last = "https://github.com/" + regex.findall(update)[0]
+        update = "https://github.com/exploitagency/ESPloitV2/releases"
+        update = requests.get(update).text
+        regex = re.compile("exploit.*\.bin")
+        last = f"https://github.com/{regex.findall(update)[0]}"
 
-         name = "firmware/"+"-".join(last.split('/')[-2:])
-         download = Path(name)
-         if not download.exists():
-             print("Downloading the last release: %s" % last)
-             r = requests.get(last, stream=True)
-             if r.status_code == 200:
-                 with open(name, 'wb') as f:
-                     for chunk in r:
-                         f.write(chunk)
+        name = "firmware/"+"-".join(last.split('/')[-2:])
+        download = Path(name)
+        if not download.exists():
+            print(f"Downloading the last release: {last}")
+            r = requests.get(last, stream=True)
+            if r.status_code == 200:
+                with open(name, 'wb') as f:
+                    for chunk in r:
+                        f.write(chunk)
 
     # NOTE: send the payload to the /runlivepayload page
     def send_payload(self, user_converted, panel):
         payloads = { "livepayload":user_converted, "livepayloadpresent":1}
         encoded  = urlencode( payloads, quote_via=quote_plus)
         try:
-            print('Sending payload to %s' % panel)
-            if not "200" in str(requests.post(panel, data=encoded)):
+            print(f'Sending payload to {panel}')
+            if "200" not in str(requests.post(panel, data=encoded)):
                 print("\033[91mError 404, are you connected on the right AP?")
 
         except Exception as e:
